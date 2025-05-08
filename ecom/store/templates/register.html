@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 2em; }
+        input { margin: 0.5em; padding: 0.5em; width: 200px; }
+        video, canvas { display: block; margin: 1em auto; }
+        button { padding: 0.5em 1em; margin-top: 1em; }
+    </style>
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="registerForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Username" required><br>
+        <input type="password" name="password" placeholder="Password" required><br>
+        <input type="password" name="password2" placeholder="Confirm Password" required><br>
+
+        <video id="video" width="300" height="225" autoplay></video>
+        <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
+        <input type="file" id="faceInput" name="face" accept="image/*" style="display:none;" required>
+        <button type="button" onclick="capturePhoto()">Capture Face</button><br>
+
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const faceInput = document.getElementById('faceInput');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; });
+
+        function capturePhoto() {
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                const file = new File([blob], "face.jpg", { type: "image/jpeg" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                faceInput.files = dataTransfer.files;
+                alert("Face captured!");
+            }, 'image/jpeg');
+        }
+    </script>
+</body>
+</html>
